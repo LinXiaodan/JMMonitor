@@ -1,4 +1,4 @@
-package Job;
+package com.lxd.monitor.Job;
 
 import org.quartz.*;
 

@@ -1,4 +1,4 @@
-package Job;
+package com.lxd.monitor.Job;
 
 import org.quartz.*;
 
@@ -6,9 +6,9 @@ import org.quartz.*;
 @PersistJobDataAfterExecution
 // 同一时间将只有一个Job实例被执行, 为了避免并发问题导致数据紊乱,建议这两个注解一起使用
 @DisallowConcurrentExecution
-public class HandleJob implements Job {
+public class SpiderJob implements Job {
 
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        System.out.println("handle");
+    public void execute(JobExecutionContext context) throws JobExecutionException{
+        System.out.println("set spider");
     }
 }
