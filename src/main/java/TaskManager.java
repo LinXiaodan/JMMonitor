@@ -1,4 +1,6 @@
+import Job.*;
 import Util.TimeUtil;
+import constant.JobType;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -11,19 +13,22 @@ public class TaskManager {
     private static Logger managerLogger = Logger.getLogger("manager_logger");
     private static String NAME_PREFIX = "task_";
 
-    public String[] addJob(int job_id, String cron, String uuid, String startProcessAddress, String startProcessPath, String addExecPath, String server_port){
+    public static String addJob(int job_id, String cron, int job_type){
         try{
             Scheduler scheduler = ssf.getScheduler();
-            JobDetail job = JobBuilder.newJob(TaskJob.class)
-                    .withIdentity(NAME_PREFIX + job_id, JOB_GROUP_NAME)
-                    .build();
 
-            job.getJobDataMap().put("job_id", job_id);
-            job.getJobDataMap().put("uuid", uuid);
-            job.getJobDataMap().put("startProcessAddress", startProcessAddress);
-            job.getJobDataMap().put("startProcessPath", startProcessPath);
-            job.getJobDataMap().put("addExecPath", addExecPath);
-            job.getJobDataMap().put("serverPort", server_port);
+            JobDetail job;
+            if(job_type == JobType.SPIDER_JOB){
+                job = JobBuilder.newJob(SpiderJob.class)
+                        .withIdentity(NAME_PREFIX + job_id, JOB_GROUP_NAME)
+                        .build();
+            }else if(job_type == JobType.HANDLE_JOB){
+                job = JobBuilder.newJob(HandleJob.class)
+                        .withIdentity(NAME_PREFIX + job_id, JOB_GROUP_NAME)
+                        .build();
+            }else{
+                return "启动失败， id: " + job_id;
+            }
 
             CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(cron).withMisfireHandlingInstructionDoNothing();
             Trigger trigger = TriggerBuilder.newTrigger()
@@ -34,20 +39,52 @@ public class TaskManager {
 
             if(!scheduler.isShutdown()){
                 scheduler.start();
-                managerLogger.info("添加并启动任务，id：" + job_id + "，uuid：" + uuid);
+                managerLogger.info("添加并启动任务，id：" + job_id);
             }
-            String now_time = TimeUtil.getFormatDate(System.currentTimeMillis());
-            String[] result = {now_time, "启动任务成功"};
-            return result;
+            return "启动成功， id: " + job_id;
         }catch (Exception e){
-            managerLogger.severe(e.toString());
-            String now_time = TimeUtil.getFormatDate(System.currentTimeMillis());
-            String[] result = {now_time, "启动任务失败"};
-            return result;
+            e.printStackTrace();
+            return "启动失败， id: " + job_id;
         }
     }
 
-    public String[] removeJob(int job_id){
+//    public static String[] addJob(int job_id, String cron, String uuid, String startProcessAddress, String startProcessPath, String addExecPath, String server_port){
+//        try{
+//            Scheduler scheduler = ssf.getScheduler();
+//            JobDetail job = JobBuilder.newJob(TaskJob.class)
+//                    .withIdentity(NAME_PREFIX + job_id, JOB_GROUP_NAME)
+//                    .build();
+//
+//            job.getJobDataMap().put("job_id", job_id);
+//            job.getJobDataMap().put("uuid", uuid);
+//            job.getJobDataMap().put("startProcessAddress", startProcessAddress);
+//            job.getJobDataMap().put("startProcessPath", startProcessPath);
+//            job.getJobDataMap().put("addExecPath", addExecPath);
+//            job.getJobDataMap().put("serverPort", server_port);
+//
+//            CronScheduleBuilder scheduleBuilder = CronScheduleBuilder.cronSchedule(cron).withMisfireHandlingInstructionDoNothing();
+//            Trigger trigger = TriggerBuilder.newTrigger()
+//                    .withIdentity(NAME_PREFIX + job_id, TRIGGER_GROUP_NAME)
+//                    .withSchedule(scheduleBuilder)
+//                    .build();
+//            scheduler.scheduleJob(job, trigger);
+//
+//            if(!scheduler.isShutdown()){
+//                scheduler.start();
+//                managerLogger.info("添加并启动任务，id：" + job_id + "，uuid：" + uuid);
+//            }
+//            String now_time = TimeUtil.getFormatDate(System.currentTimeMillis());
+//            String[] result = {now_time, "启动任务成功"};
+//            return result;
+//        }catch (Exception e){
+//            managerLogger.severe(e.toString());
+//            String now_time = TimeUtil.getFormatDate(System.currentTimeMillis());
+//            String[] result = {now_time, "启动任务失败"};
+//            return result;
+//        }
+//    }
+
+    public static String[] removeJob(int job_id){
         TriggerKey triggerKey = TriggerKey.triggerKey(NAME_PREFIX + job_id, TRIGGER_GROUP_NAME);
         JobKey jobKey = JobKey.jobKey(NAME_PREFIX + job_id, JOB_GROUP_NAME);
         try{
@@ -75,7 +112,7 @@ public class TaskManager {
         }
     }
 
-    public boolean pauseAll(){
+    public static boolean pauseAll(){
         try{
             Scheduler scheduler = ssf.getScheduler();
             scheduler.shutdown();
