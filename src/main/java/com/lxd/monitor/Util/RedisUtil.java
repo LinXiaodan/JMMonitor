@@ -85,17 +85,17 @@ public class RedisUtil {
         return true;
     }
 
-//    public static void main(String[] args){
-//        Jedis jedis = RedisUtil.getJedis();
-//        String key = "test list";
-//        RedisUtil.pushString(jedis, key, "a");
-//        RedisUtil.pushString(jedis, key, "b");
-//        RedisUtil.pushString(jedis, key, "cccc");
-//        String a = RedisUtil.popString(jedis, key);
-//        String b = RedisUtil.popString(jedis, key);
-//        System.out.println(a);
-//        System.out.println(b);
-//        System.out.println(returnString(jedis, key, a));
-//    }
+    public static void main(String[] args){
+        Jedis jedis = RedisUtil.getJedis();
+        String key = "test list";
+        RedisUtil.pushString(jedis, key, "a");
+        RedisUtil.pushString(jedis, key, "b");
+        RedisUtil.pushString(jedis, key, "cccc");
+        String a = RedisUtil.popString(jedis, key);
+        String b = RedisUtil.popString(jedis, key);
+        System.out.println(a);
+        System.out.println(b);
+        System.out.println(returnString(jedis, key, a));
+    }
 }
 
